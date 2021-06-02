@@ -33,7 +33,68 @@ Firstly, add `NSLocationWhenInUseUsageDescription`, `NSLocationUsageDescription`
 
 ## Quick Start Guide
 
-Steps ...
+`LBARView` can be used both with SwiftUI and UIKit frameworks. First, one should declare it as a property:
+
+```swift
+
+func makeUIView(context: Context) -> LBARView {
+    let arView = LBARView(frame: .zero)
+    
+    // perform view's configuration
+    
+    return arView
+}
+
+```
+
+Once the app is ready for AR experience, a native method for running a session should be called:
+
+```swift
+
+let configuration: ARWorldTrackingConfiguration = LBARView.defaultConfiguration()
+let options: ARSession.RunOptions = [
+    // options to run session
+]
+arView.session.run(configuration, options: options)
+
+```
+
+`LBARView` expects to operate with its default or similar configurations. It can be specified based on application needs, however, the `.worldAlignment` property of session config should always be set to `.gravityAndHeading`. It also important to mention that `LBARView` **does not** listen to location updates by default and expects them to be provided externaly.
+
+`LBARView` comes with a special class which represents Location-Based anchors: `LBAnchor`. It is a custom subclass of `ARAnchor`, which inherits all the properties and behaviour of ARAnchor and can be further subclassed too. The class containes containes geolocation data and supports `SecureCoding`, which means it can be used in tasks related to sharing experience among different devices as it would be serialized with `ARWorldMap` object automatically.
+
+`LBARView` supports several approaches of location anchors creation:
+
+```swift
+
+let location = CLLocation(/* params for initialization */)
+arView.add(location: location) // CoreLocation's object
+
+let placemark = Placemark(/* params for initialization */)
+arView.add(placemark: placemark) // Custom object for location with associated name
+
+let anchor = LBAnchor(/* params for initialization */)
+arView.add(anchor: anchor) // Location-based anchor
+
+let anchorEntity = AnchorEntity(/* params for initialization */)
+arView.add(entity: anchorEntity) // RealityKit's Anchor Entity object
+
+```
+
+`LBAnchor` should not be added to `ARSession` manually as in such case `LBARView` won't be able to properly process location data and manage it during further tracking. However, when anchor is added via special methods, it can be further used as anchoring target for RealityKit's entities:
+
+```swift
+
+let anchor: LBAnchor!
+let anchorEntity = AnchorEntity(anchor: anchor)
+let sphere = ModelEntity.sphereModel(radius: 0.1, color: anchor.locationEstimation.color, isMetallic: true)
+anchorEntity.addChild(sphere)
+arView.scene.addAnchor(anchorEntity)
+
+```
+
+Finally, `LBARView` provides a set of tools for conversion between real-world coordinates to virtual world position and vice versa. 
+
 
 ## Additional Features
 
