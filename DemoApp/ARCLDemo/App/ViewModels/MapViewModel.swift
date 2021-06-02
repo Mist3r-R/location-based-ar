@@ -19,7 +19,9 @@ class MapViewModel: NSObject, ObservableObject {
     // selected location
     @Published var selectedLocation: MapLocation? = nil
     
-    @Published var allowTap: Bool = true
+    @Published var allowTap: Bool = UserDefaultsConfig.isMapTapEnabled {
+        willSet(newValue) { UserDefaultsConfig.isMapTapEnabled = newValue }
+    }
     
     // Chosen anchor
     // Added anchors

@@ -56,16 +56,16 @@ class AnnotationView: UIView {
         
         titleLabel = UILabel()
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = .systemFont(ofSize: 22, weight: .medium)
+        titleLabel.font = .systemFont(ofSize: 16, weight: .medium)
         titleLabel.textColor = .label
         titleLabel.numberOfLines = 2
-        titleLabel.textAlignment = .center
+        titleLabel.textAlignment = .left
         
         distanceLabel = UILabel()
         distanceLabel.translatesAutoresizingMaskIntoConstraints = false
-        distanceLabel.font = .systemFont(ofSize: 16, weight: .regular)
+        distanceLabel.font = .systemFont(ofSize: 13, weight: .regular)
         distanceLabel.textColor = .secondaryLabel
-        distanceLabel.textAlignment = .center
+        distanceLabel.textAlignment = .left
         
         infoButton = UIButton(type: .detailDisclosure)
         infoButton.translatesAutoresizingMaskIntoConstraints = false

@@ -65,6 +65,7 @@ struct TopControlItems: View {
 struct BottomControlBar: View {
     
     @EnvironmentObject var placementSettings: PlacementSettings
+    @EnvironmentObject var arSessionManager: ARSessionManager
 
     @Binding var showBrowse: Bool
     @Binding var showSettings: Bool
@@ -93,6 +94,7 @@ struct BottomControlBar: View {
             .buttonStyle(PlainButtonStyle())
             .sheet(isPresented: $showSettings, content: {
                 SettingsView(showSettings: $showSettings)
+                    .environmentObject(arSessionManager)
             })
         }
         .padding(30)

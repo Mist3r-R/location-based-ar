@@ -30,7 +30,7 @@ struct Message: View {
                         .lineLimit(1)
                 }
             }
-            .frame(width: 250, height: 50)
+            .frame(width: 200, height: 50)
             .cornerRadius(8.0)
             
             Spacer()

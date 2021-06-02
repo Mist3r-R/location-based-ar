@@ -48,6 +48,10 @@ struct SettingsGrid: View {
                     SettingsToggleButton(setting: .arInput, isOn: $arSessionManager.allowTap)
                 }
                 
+                SliderControl(label: "Distance Filter", value: $arSessionManager.distanceFilterValue)
+                    .frame(maxWidth: 350)
+                    
+                
                 Separator()
                 
                 Text("AR Configuration")

@@ -27,7 +27,6 @@ struct HomeView: View {
         }
         .edgesIgnoringSafeArea(.all)
         .onAppear(perform: {
-            LocalDataManager.shared.storeDefault()
             
             // imitate loading
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) {

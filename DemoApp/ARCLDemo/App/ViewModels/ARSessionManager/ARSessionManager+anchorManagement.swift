@@ -93,17 +93,25 @@ extension ARSessionManager {
     }
     
     func loadCachedAnchors() {
-        let placemarks: [Placemark] = LocalDataManager.shared.loadSavedLocations().compactMap {
-            
-            guard $0.accuracy < 3 else { return nil }
-            LocalDataManager.shared.delete($0)
-            return Placemark(
-                coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
-                accuracy: $0.accuracy,
-                altitude: nil,
-                altitudeAccuracy: nil,
-                placeName: $0.name
-            )
+        let cached = LocalDataManager.shared.loadSavedLocations()
+        print("\(#file) -- loadCachedAnchors -- count = \(cached.count)")
+        let placemarks: [Placemark]
+        
+        if cached.isEmpty || cached.count > 50 {
+            LocalDataManager.shared.clearCache()
+             placemarks = LocalDataManager.shared.defaultLocations
+        } else {
+            placemarks = cached.compactMap({
+                guard $0.accuracy < 3 else { return nil }
+                LocalDataManager.shared.delete($0)
+                return Placemark(
+                    coordinate: CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude),
+                    accuracy: $0.accuracy,
+                    altitude: nil,
+                    altitudeAccuracy: nil,
+                    placeName: $0.name
+                )
+            })
         }
         placemarks.forEach { place in
             let distanceTime = (self.arView.lastSceneLocation?.distance(from: place.location) ?? 0) / 1000

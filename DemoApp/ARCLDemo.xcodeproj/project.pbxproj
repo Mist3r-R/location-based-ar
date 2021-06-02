@@ -22,6 +22,7 @@
 		9E1D1AE5266748C00083581D /* UserDefaults+savabale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1D1AE4266748C00083581D /* UserDefaults+savabale.swift */; };
 		9E1D1AEA26676EFF0083581D /* LBAR in Frameworks */ = {isa = PBXBuildFile; productRef = 9E1D1AE926676EFF0083581D /* LBAR */; };
 		9E4493D7264FE2AC0079E6D0 /* MapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4493D6264FE2AC0079E6D0 /* MapButton.swift */; };
+		9E484B822667B40500A95825 /* Slider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E484B812667B40400A95825 /* Slider.swift */; };
 		9E5EE550265159400026E740 /* toy_car.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54D2651593E0026E740 /* toy_car.usdz */; };
 		9E5EE551265159400026E740 /* toy_biplane.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54E2651593F0026E740 /* toy_biplane.usdz */; };
 		9E5EE552265159400026E740 /* toy_robot_vintage.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54F265159400026E740 /* toy_robot_vintage.usdz */; };
@@ -78,6 +79,7 @@
 		9E1D1AE1266744770083581D /* UserDefaultsConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsConfig.swift; sourceTree = "<group>"; };
 		9E1D1AE4266748C00083581D /* UserDefaults+savabale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+savabale.swift"; sourceTree = "<group>"; };
 		9E4493D6264FE2AC0079E6D0 /* MapButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapButton.swift; sourceTree = "<group>"; };
+		9E484B812667B40400A95825 /* Slider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slider.swift; sourceTree = "<group>"; };
 		9E5EE54D2651593E0026E740 /* toy_car.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_car.usdz; sourceTree = "<group>"; };
 		9E5EE54E2651593F0026E740 /* toy_biplane.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_biplane.usdz; sourceTree = "<group>"; };
 		9E5EE54F265159400026E740 /* toy_robot_vintage.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_robot_vintage.usdz; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 				9E5FA58D265C0E0600CDA3AC /* HorizontalGrid.swift */,
 				9E5EE56D26519A610026E740 /* Separator.swift */,
 				9E1D1AD6266735D90083581D /* Message.swift */,
+				9E484B812667B40400A95825 /* Slider.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -480,6 +483,7 @@
 				9E1D1ABB266691280083581D /* AnnotationComponent.swift in Sources */,
 				9E5FA5AC265D2FDE00CDA3AC /* CLLocationCoordinate+description.swift in Sources */,
 				9E1D1AC2266692230083581D /* AnnotationEntity.swift in Sources */,
+				9E484B822667B40500A95825 /* Slider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

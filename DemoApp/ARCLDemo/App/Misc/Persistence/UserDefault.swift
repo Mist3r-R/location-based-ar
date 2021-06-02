@@ -22,6 +22,7 @@ public struct UserDefault<T> {
             return UserDefaults.standard.object(forKey: key) as? T ?? defaultValue
         }
         set {
+            print("\(#file) -- setting \(newValue) for \(key)")
             UserDefaults.standard.set(newValue, forKey: key)
         }
     }

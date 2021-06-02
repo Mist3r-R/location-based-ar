@@ -15,22 +15,80 @@ import LocationBasedAR
 class ARSessionManager: NSObject, ObservableObject {
     
     // MARK: - Session Settings Properties
-    @Published var isPeopleOcclusionEnabled: Bool = false { willSet(newValue) { updatePeopleOcclusion(isEnabled: newValue) }}
-    @Published var isObjectOcclusionEnabled: Bool = false { willSet(newValue) { updateObjectOcclusion(isEnabled: newValue) }}
-    @Published var isLidarDebugEnabled: Bool = false { willSet(newValue) { updateLidarDebug(isEnabled: newValue) }}
-    @Published var isAnchorOriginsEnabled: Bool = false { willSet(newValue) { updateAnchorOrigins(isEnabled: newValue) }}
-    @Published var isWorldOriginEnabled: Bool = false { willSet(newValue) { updateWorldOrigin(isEnabled: newValue) }}
-    @Published var areFeaturePointsEnabled: Bool = false { willSet(newValue) { updateFeaturePoints(isEnabled: newValue) }}
-    @Published var isCollisionEnabled: Bool = false { willSet(newValue) { updateCollision(isEnabled: newValue) }}
-    
-    @Published var showAnnotations: Bool = false {
-        didSet(newValue) {
-            self.resetAnnotations()
-            self.arView.resetDistantAnchors()
+    @Published var isPeopleOcclusionEnabled: Bool {
+        willSet(newValue) {
+            UserDefaultsConfig.isPeopleOcclusionEnabled = newValue
+            updatePeopleOcclusion(isEnabled: newValue)
+        }
+    }
+    @Published var isObjectOcclusionEnabled: Bool {
+        willSet(newValue) {
+            UserDefaultsConfig.isObjectOcclusionEnabled = newValue
+            updateObjectOcclusion(isEnabled: newValue)
+        }
+    }
+    @Published var isLidarDebugEnabled: Bool = false {
+        willSet(newValue) {
+            updateLidarDebug(isEnabled: newValue)
+        }
+    }
+    @Published var isAnchorOriginsEnabled: Bool = false {
+        willSet(newValue) {
+            updateAnchorOrigins(isEnabled: newValue)
+        }
+    }
+    @Published var isWorldOriginEnabled: Bool {
+        willSet(newValue) {
+            UserDefaultsConfig.isWorldOriginEnabled = newValue
+            updateWorldOrigin(isEnabled: newValue)
+        }
+    }
+    @Published var areFeaturePointsEnabled: Bool = false {
+        willSet(newValue) {
+            updateFeaturePoints(isEnabled: newValue)
+        }
+    }
+    @Published var isCollisionEnabled: Bool {
+        willSet(newValue) {
+            UserDefaultsConfig.isCollisionEnabled = newValue
+            updateCollision(isEnabled: newValue)
         }
     }
     
-    @Published var allowTap: Bool = false
+    @Published var showAnnotations: Bool {
+        willSet(newValue) {
+            UserDefaultsConfig.isAnnotationsPreferred = newValue
+            self.resetAnnotations()
+            self.arView.resetDistantAnchors().forEach { anchorData in
+                guard let anchor = anchorData.anchor,
+                      let name = anchor.name, name != "LBAnchor" else { return }
+                if newValue {
+                    anchorData.anchorEntity?.isEnabled = false
+                    if let projection = self.arView.project(anchor.transform.translation) {
+                        self.createAnnotation(projection: projection, anchor: anchor)
+                    }
+                }
+                else {
+                    if let anchorEntity = anchorData.anchorEntity {
+                        anchorEntity.isEnabled = true
+                    } else {
+                        self.createAnchorEntity(name: name, anchor: anchor)
+                    }
+                }
+            }
+        }
+    }
+    
+    @Published var allowTap: Bool {
+        willSet(newValue) { UserDefaultsConfig.isARTapEnabled = newValue }
+    }
+    
+    @Published var distanceFilterValue: Double {
+        didSet(newValue) {
+            UserDefaultsConfig.distanceFilterValue = newValue
+            self.arView.displayRangeFilter = newValue
+        }
+    }
     
     // MARK: - ARView Properties
     @Published var selectedAnchor: LocationAnchorData? = nil
@@ -46,10 +104,19 @@ class ARSessionManager: NSObject, ObservableObject {
     
     override init() {
 //        self.isRunning = false
+        isPeopleOcclusionEnabled = UserDefaultsConfig.isPeopleOcclusionEnabled
+        isObjectOcclusionEnabled = UserDefaultsConfig.isObjectOcclusionEnabled
+        isWorldOriginEnabled = UserDefaultsConfig.isWorldOriginEnabled
+        isCollisionEnabled = UserDefaultsConfig.isCollisionEnabled
+        showAnnotations = UserDefaultsConfig.isAnnotationsPreferred
+        allowTap = UserDefaultsConfig.isARTapEnabled
+        distanceFilterValue = UserDefaultsConfig.distanceFilterValue
+        
         super.init()
         
         self.arView.session.delegate = self
         self.arView.delegate = self
+        self.arView.locationUpdateFilter = 0.5
         self.initGestures()
         self.startSession()
         
@@ -105,9 +172,9 @@ class ARSessionManager: NSObject, ObservableObject {
             anno.projection = Projection(projectedPoint: projectedPoint, isVisible: isVisible)
             anno.updateScreenPosition()
             
-            if anno.anchorIdentifier != nil && anno.anchorIdentifier != id && !isVisible {
-                anno.reanchor(.anchor(identifier: id))
-            }
+//            if anno.anchorIdentifier != nil && anno.anchorIdentifier != id && !isVisible {
+//                anno.reanchor(.anchor(identifier: id))
+//            }
         }
     }
     
@@ -123,8 +190,11 @@ class ARSessionManager: NSObject, ObservableObject {
     
     private func resetAnnotations() {
         for (id, anno) in annotations {
+            anno.view?.isHidden = true
             anno.view?.removeFromSuperview()
+            self.arView.scene.removeAnchor(anno)
         }
+        annotations.removeAll()
     }
     
     // MARK: - Session Settings Methods

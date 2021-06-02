@@ -33,7 +33,7 @@ extension LBARView {
         return distance.distanceString
     }
     
-    func resetDistantAnchors() {
+    func resetDistantAnchors() -> [LocationAnchorData] {
         var toRemove = [LocationAnchorData]()
         self.getVisibleAnchors().forEach { anchor in
             if let estimation = anchor.anchor?.locationEstimation,
@@ -42,11 +42,7 @@ extension LBARView {
                 toRemove.append(anchor)
             }
         }
-        toRemove.forEach {
-            guard let anchor = $0.anchor else { return }
-            self.remove(anchor: anchor)
-            self.add(anchor: anchor)
-        }
+        return toRemove
     }
 }
 
