@@ -29,7 +29,7 @@ The library contains a Demo App, which covers most of use cases.
 
 ## Setting Up the Project
 
-Firstly, add `NSLocationWhenInUseUsageDescription`, `NSLocationUsageDescription` and `NSLocationTemporaryUsageDescriptionDictionary` keys with descriptions to your `Info.plist` to be able to use CoreLocation. Note that library requires full accuracy mode (new in iOS 14), so the third key should be provided. Secondly, add `NSCameraUsageDescription` key which is required by ARKit.
+Firstly, add `NSLocationWhenInUseUsageDescription`, `NSLocationUsageDescription` and `NSLocationTemporaryUsageDescriptionDictionary` keys with descriptions to your `Info.plist` to be able to use CoreLocation. Note that library requires full accuracy mode (new in iOS 14), so the third key should be provided. Secondly, add `NSCameraUsageDescription` key which is required by ARKit. Finally, import this library: `import LocationBasedAR`.
 
 ## Quick Start Guide
 
@@ -37,4 +37,28 @@ Steps ...
 
 ## Additional Features
 
-About features ...
+Besides a great variety of conversions and transformations that can take place in Location-Based AR projects, the library comes with `RealityKit`'s extensions for *async loading* of remote Textures and Entities. These methods can be used in a similar to native `loadAsync` approach:
+
+```swift
+
+let url = URL(string: "https://developer.apple.com/augmented-reality/quick-look/models/retrotv/tv_retro.usdz")!
+
+ModelEntity.loadModelAsync(from: url) { result in
+            switch result {
+            case .failure(let err): // handle downloading error
+            case .success(let loadRequest):
+                _ /* AnyCancellable variable */ = loadRequest.sink(receiveCompletion: { loadCompletion in
+
+                    switch loadCompletion {
+                    case .failure(let error): // handle loading from local storage error
+                    case .finished: break
+                    }
+                    
+                }, receiveValue: { modelEntity in
+                    
+                    // do your stuff with received USDZ model
+                })
+            }
+        }
+
+```
