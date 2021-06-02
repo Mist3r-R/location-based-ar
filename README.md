@@ -62,3 +62,11 @@ ModelEntity.loadModelAsync(from: url) { result in
         }
 
 ```
+
+## Issues
+
+One of the main issues is that CoreLocation does not provide reliable altitude estimations, thus the most stable approach to estimate vertical positions of model entities is to use the same altitude as the user's device has at the moment of estimation.
+
+Second known issue is the limitation of tracking distance. Unfortunately, ARKit fails to track positions of anchors further than 100m away from the device, so the content should be placed closer in order to be rendered properly. 
+
+Finally, sometimes CoreLocation fails to provide accurate values of device heading at the startup and thus the virtual content may appear on wrong positions which may improve over time. In addition, sometimes the direction of user movement can be estimated incorrectly and location updates will represent the moving in the opposite direction, which results in further distance from the anchor in virtual space than is should be.
