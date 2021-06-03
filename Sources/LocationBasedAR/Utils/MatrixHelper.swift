@@ -29,4 +29,19 @@ struct MatrixHelper {
         let transform = simd_mul(rotation, distanceTransform)
         return transform
     }
+    
+    static func scale(_ matrix: matrix_float4x4, with coeff: Float) -> matrix_float4x4 {
+        let scaling = simd_float4x4.scaleTransform(coeff)
+        let transform = simd_mul(scaling, matrix)
+        return transform
+    }
+    
+    static func scale(_ matrix: matrix_float4x4, with vector: SIMD3<Float>) -> matrix_float4x4 {
+        let scaling = simd_float4x4.scaleTransform(vector)
+        var transform = simd_mul(scaling, matrix)
+        transform.columns.3.x = matrix.columns.3.x
+        transform.columns.3.y = matrix.columns.3.y
+        transform.columns.3.z = matrix.columns.3.z
+        return transform
+    }
 }

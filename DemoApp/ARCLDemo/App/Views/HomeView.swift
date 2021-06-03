@@ -40,6 +40,7 @@ struct HomeView: View {
             locationManager.start()
             
             locationManager.onLocationChanged = arSessionManager.receive(location:)
+            arSessionManager.configure(locationManager)
         })
         .onDisappear(perform: {
             locationManager.stop()

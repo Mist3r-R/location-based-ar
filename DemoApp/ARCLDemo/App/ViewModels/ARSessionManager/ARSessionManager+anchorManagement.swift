@@ -24,6 +24,21 @@ extension ARSessionManager {
             self.selectedAnchor = self.arView.getAnchor(by: anchor.identifier)
         }
         guard let annoView = annotation.view else { return }
+        
+        // Gets the 2D screen point of the 3D world point.
+        let translation = annotation.transformMatrix(relativeTo: nil).translation
+        guard let projectedPoint = self.arView.project(translation) else { return }
+        
+        // Calculates whether the note can be currently visible by the camera.
+        let cameraForward = arView.cameraTransform.matrix.columns.2.xyz
+        let cameraToWorldPointDirection = normalize(translation - self.arView.cameraTransform.translation)
+        let dotProduct = dot(cameraForward, cameraToWorldPointDirection)
+        let isVisible = dotProduct < 0
+
+        // Updates the screen position of the note based on its visibility
+//        annotation.projection = Projection(projectedPoint: projectedPoint, isVisible: isVisible)
+//        annotation.updateScreenPosition()
+        annotation.view?.isHidden = true
         self.arView.addSubview(annoView)
         self.annotations[anchor.identifier] = annotation
     }

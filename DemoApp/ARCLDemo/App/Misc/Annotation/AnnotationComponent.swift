@@ -84,6 +84,12 @@ extension HasAnnotationView {
         }
     }
     
+    func updateDistanceLabel(with text: String?) {
+        guard let projection = projection else { return }
+        guard projection.isVisible else { return }
+        self.view?.distanceLabel.text = text
+    }
+    
 }
 
 

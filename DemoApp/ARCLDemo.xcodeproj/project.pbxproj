@@ -20,9 +20,9 @@
 		9E1D1ADE266744690083581D /* UserDefault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1D1ADD266744690083581D /* UserDefault.swift */; };
 		9E1D1AE2266744770083581D /* UserDefaultsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1D1AE1266744770083581D /* UserDefaultsConfig.swift */; };
 		9E1D1AE5266748C00083581D /* UserDefaults+savabale.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E1D1AE4266748C00083581D /* UserDefaults+savabale.swift */; };
-		9E1D1AEA26676EFF0083581D /* LBAR in Frameworks */ = {isa = PBXBuildFile; productRef = 9E1D1AE926676EFF0083581D /* LBAR */; };
 		9E4493D7264FE2AC0079E6D0 /* MapButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4493D6264FE2AC0079E6D0 /* MapButton.swift */; };
 		9E484B822667B40500A95825 /* Slider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E484B812667B40400A95825 /* Slider.swift */; };
+		9E523D632668B5F30065DCD3 /* LBAR in Frameworks */ = {isa = PBXBuildFile; productRef = 9E523D622668B5F30065DCD3 /* LBAR */; };
 		9E5EE550265159400026E740 /* toy_car.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54D2651593E0026E740 /* toy_car.usdz */; };
 		9E5EE551265159400026E740 /* toy_biplane.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54E2651593F0026E740 /* toy_biplane.usdz */; };
 		9E5EE552265159400026E740 /* toy_robot_vintage.usdz in Resources */ = {isa = PBXBuildFile; fileRef = 9E5EE54F265159400026E740 /* toy_robot_vintage.usdz */; };
@@ -80,6 +80,7 @@
 		9E1D1AE4266748C00083581D /* UserDefaults+savabale.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserDefaults+savabale.swift"; sourceTree = "<group>"; };
 		9E4493D6264FE2AC0079E6D0 /* MapButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapButton.swift; sourceTree = "<group>"; };
 		9E484B812667B40400A95825 /* Slider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Slider.swift; sourceTree = "<group>"; };
+		9E523D5B2668B4EB0065DCD3 /* LBAR */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LBAR; path = ../LBAR; sourceTree = "<group>"; };
 		9E5EE54D2651593E0026E740 /* toy_car.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_car.usdz; sourceTree = "<group>"; };
 		9E5EE54E2651593F0026E740 /* toy_biplane.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_biplane.usdz; sourceTree = "<group>"; };
 		9E5EE54F265159400026E740 /* toy_robot_vintage.usdz */ = {isa = PBXFileReference; lastKnownFileType = file.usdz; path = toy_robot_vintage.usdz; sourceTree = "<group>"; };
@@ -128,7 +129,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9E5EE58B2651D81E0026E740 /* FocusEntity in Frameworks */,
-				9E1D1AEA26676EFF0083581D /* LBAR in Frameworks */,
+				9E523D632668B5F30065DCD3 /* LBAR in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +331,7 @@
 		9EBF50E6264EAC9500C5CFEF = {
 			isa = PBXGroup;
 			children = (
+				9E523D5B2668B4EB0065DCD3 /* LBAR */,
 				9EBF50F1264EAC9600C5CFEF /* ARCLDemo */,
 				9EBF50F0264EAC9600C5CFEF /* Products */,
 				9E7C79B026662FAF001DAAF1 /* Frameworks */,
@@ -374,7 +376,7 @@
 			name = ARCLDemo;
 			packageProductDependencies = (
 				9E5EE58A2651D81E0026E740 /* FocusEntity */,
-				9E1D1AE926676EFF0083581D /* LBAR */,
+				9E523D622668B5F30065DCD3 /* LBAR */,
 			);
 			productName = ARCLDemo;
 			productReference = 9EBF50EF264EAC9600C5CFEF /* ARCLDemo.app */;
@@ -405,7 +407,6 @@
 			mainGroup = 9EBF50E6264EAC9500C5CFEF;
 			packageReferences = (
 				9E5EE5892651D81D0026E740 /* XCRemoteSwiftPackageReference "FocusEntity" */,
-				9E1D1AE826676EFF0083581D /* XCRemoteSwiftPackageReference "location-based-ar" */,
 			);
 			productRefGroup = 9EBF50F0264EAC9600C5CFEF /* Products */;
 			projectDirPath = "";
@@ -672,14 +673,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		9E1D1AE826676EFF0083581D /* XCRemoteSwiftPackageReference "location-based-ar" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Mist3r-R/location-based-ar";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
-			};
-		};
 		9E5EE5892651D81D0026E740 /* XCRemoteSwiftPackageReference "FocusEntity" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/maxxfrazer/FocusEntity";
@@ -691,9 +684,8 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		9E1D1AE926676EFF0083581D /* LBAR */ = {
+		9E523D622668B5F30065DCD3 /* LBAR */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 9E1D1AE826676EFF0083581D /* XCRemoteSwiftPackageReference "location-based-ar" */;
 			productName = LBAR;
 		};
 		9E5EE58A2651D81E0026E740 /* FocusEntity */ = {

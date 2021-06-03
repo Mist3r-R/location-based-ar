@@ -27,9 +27,7 @@ extension LBARView {
     
     func getDistanceString(for anchorId: UUID) -> String? {
         guard let anchorData = self.getAnchor(by: anchorId) else { return nil }
-        guard let currentLocation = self.lastSceneLocation else { return nil }
-        
-        let distance = currentLocation.haversineDistance(from: anchorData.location)
+        guard let distance = self.anchorDistances[anchorData.id] else { return nil }
         return distance.distanceString
     }
     

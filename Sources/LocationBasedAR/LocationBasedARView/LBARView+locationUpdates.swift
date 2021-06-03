@@ -20,9 +20,23 @@ public extension LBARView {
         self.trackingStatus = TrackingStatus.initializing(with: .waitingForLocation)
     }
     
+    func startLocationUpdateTimer(with interval: TimeInterval = 5) {
+        self.locationUpdatesTimer = Timer(timeInterval: interval, target: self, selector: #selector(checkAndUpdateLocation), userInfo: nil, repeats: true)
+    }
+    
+    func stopLocationUpdateTimer() {
+        self.locationUpdatesTimer.invalidate()
+    }
+    
+    @objc func checkAndUpdateLocation() {
+        if let location = self.locationProvider?.getCurrentLocation() {
+            print("DEBUG: -- performing location check and update ...")
+            self.updateLocation(location)
+        }
+    }
+    
     /// Updates `currenSceneLocation` with the provided location
     func updateLocation(_ newLocation: CLLocation) {
-//        print("\(#file) -- LBARView -- received new location = \(newLocation)")
         _ = self.updateSceneLocation(newLocation)
     }
     
@@ -30,7 +44,8 @@ public extension LBARView {
     private func updateSceneLocation(_ newlocation: CLLocation) -> CLLocation {
         
         guard let lastLocation = self.lastSceneLocation,
-              let lastAccuracy = self.lastSceneLocationAccuracy else {
+              let lastAccuracy = self.lastSceneLocationAccuracy,
+              let lastCameraPosition = self.lastCameraPosition else {
             // save without any additional checks if first update
             self.setLocation(newlocation, with: newlocation.horizontalAccuracy)
             return newlocation
@@ -50,16 +65,18 @@ public extension LBARView {
     // Helper method to check whether the currentSceneLocation value should be updated
     internal func needsLocationUpdate() -> Bool {
         
-        guard let _ = self.lastSceneLocation, let lastAccuracy = self.lastSceneLocationAccuracy else {
-            // no location data yet
+        guard let lastLocation = self.lastSceneLocation,
+              let lastAccuracy = self.lastSceneLocationAccuracy,
+              let lastCameraPosition = self.lastCameraPosition else {
             return true
         }
         
-        // use last camera position or world origin
-        let lastCameraPosition: SIMD3<Float> = self.lastCameraPosition ?? [0, 0, 0]
-        let distanceFromLastPosition = Double(distance(lastCameraPosition, self.cameraTransform.translation))
+        let distanceFromLastPosition = Double((lastCameraPosition.resetToHorizon - self.cameraTransform.translation.resetToHorizon).length)
         
-        // traveled distance of device is larger than previous location range
+        // last location data is too old
+        if -lastLocation.timestamp.timeIntervalSinceNow > 5 { return true }
+        
+        // traveled distance of device is larger than previous location accuracy range
         if distanceFromLastPosition >= lastAccuracy { return true }
         
         // traveled distance of device is larger than update filter

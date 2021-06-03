@@ -38,6 +38,9 @@ public extension LocationManagerDelegate {
     func locationManagerDidReceiveRejection() { }
 }
 
+public protocol LocationDataProvider: class {
+    func getCurrentLocation() -> CLLocation?
+}
 
 public enum LocationTrackingAccuracy: Int {
     case undefined = 0

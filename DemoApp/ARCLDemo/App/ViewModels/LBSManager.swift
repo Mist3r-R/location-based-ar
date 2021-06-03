@@ -68,3 +68,9 @@ extension LBSManager: LocationManagerDelegate {
         self.permissionDenied.toggle()
     }
 }
+
+extension LBSManager: LocationDataProvider {
+    public func getCurrentLocation() -> CLLocation? {
+        return self.locationManager.getCurrentLocation()
+    }
+}

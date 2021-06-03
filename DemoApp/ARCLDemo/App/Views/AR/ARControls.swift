@@ -66,6 +66,7 @@ struct BottomControlBar: View {
     
     @EnvironmentObject var placementSettings: PlacementSettings
     @EnvironmentObject var arSessionManager: ARSessionManager
+    @EnvironmentObject var mapViewModel: MapViewModel
 
     @Binding var showBrowse: Bool
     @Binding var showSettings: Bool
@@ -95,6 +96,7 @@ struct BottomControlBar: View {
             .sheet(isPresented: $showSettings, content: {
                 SettingsView(showSettings: $showSettings)
                     .environmentObject(arSessionManager)
+                    .environmentObject(mapViewModel)
             })
         }
         .padding(30)

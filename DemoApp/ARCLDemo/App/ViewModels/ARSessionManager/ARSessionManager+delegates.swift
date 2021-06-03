@@ -40,7 +40,7 @@ extension ARSessionManager: LBARViewDelegate {
     }
     
     func view(_ view: LBARView, didUpdate anchors: [LBAnchor]) {
-        print("\(#file) -- ARSessionManager/LBARViewDelegate -- didUpdate \(anchors.debugDescription)")
+        self.addCallback?(anchors)
         anchors.forEach({ lbAnchor in
             if let name = lbAnchor.name,
                name != "LBAnchor",
@@ -48,34 +48,14 @@ extension ARSessionManager: LBARViewDelegate {
                 
                 if self.showAnnotations {
                     
-                    // insert new annotation
-                    if let projection = self.arView.project(lbAnchor.transform.translation) {
-                        self.createAnnotation(projection: projection, anchor: lbAnchor)
+                    if let annotation = self.annotations[lbAnchor.identifier] {
+                        annotation.view?.distanceLabel.text = self.arView.getDistanceString(for: lbAnchor.identifier)
+                    } else {
+                        if let projection = self.arView.project(lbAnchor.transform.translation) {
+                            self.createAnnotation(projection: projection, anchor: lbAnchor)
+                        }
                     }
                     
-//                    // find and remove old one
-//                    var oldId: UUID?
-//                    var annotation: AnnotationEntity?
-//
-//                    for (id, anno) in self.annotations {
-//                        if (self.arView.getAnchor(by: id) == nil) && (anno.view?.titleLabel.text == name) {
-//                            // we found our annotation, reanchor it
-//                            anno.view?.distanceLabel.text = self.arView.getDistanceString(for: lbAnchor.identifier)
-//                            oldId = id
-//                            annotation = anno
-//                            break
-//                        }
-//                    }
-//
-//                    if let id = oldId, let anno = annotation {
-//
-//                        self.annotations.removeValue(forKey: id)
-//                        self.annotations[lbAnchor.identifier] = anno
-//                        anno.reanchor(.anchor(identifier: lbAnchor.identifier), preservingWorldTransform: true)
-//                        anno.view?.showCallback = { [unowned self] in
-//                            self.selectedAnchor = self.arView.getAnchor(by: lbAnchor.identifier)
-//                        }
-//                    }
                 } else {
                     if let anchorEntity = anchorData.anchorEntity,
                        let textEntity = anchorEntity.textEntity as? ModelEntity {
@@ -84,6 +64,7 @@ extension ARSessionManager: LBARViewDelegate {
                         textEntity.components.set(text)
                         
                         if let scaleCoeff = self.arView.getScaling(for: lbAnchor.location, with: 5.0) {
+                            
                             anchorEntity.setScale(.scaleTransform(scaleCoeff), relativeTo: nil)
                         }
                     }

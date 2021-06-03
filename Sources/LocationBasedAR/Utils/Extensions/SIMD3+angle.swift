@@ -33,4 +33,12 @@ public extension SIMD3 where Scalar == Float {
     static func scaleTransform(_ coeff: Float) -> SIMD3<Float> {
         return [coeff, coeff, coeff]
     }
+    
+    var resetToHorizon: SIMD3<Float> {
+        return [self.x, 0, self.z]
+    }
+    
+    var length: Float {
+        return sqrt(self.x * self.x + self.y * self.y + self.z * self.z)
+    }
 }

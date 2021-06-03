@@ -142,11 +142,18 @@ class ARSessionManager: NSObject, ObservableObject {
         
         self.arView.removeAll()
         
+        LocalDataManager.shared.clearCache()
+        
         if let config = arView.session.configuration as? ARWorldTrackingConfiguration {
             self.run(config, options: [.removeExistingAnchors, .resetTracking])
         } else {
             self.run(defaultConfig, options: [.removeExistingAnchors, .resetTracking])
         }
+    }
+    
+    func configure(_ locationProvider: LocationDataProvider) {
+        self.arView.locationProvider = locationProvider
+        self.arView.startLocationUpdateTimer()
     }
     
     func receive(location update: CLLocation?) {
@@ -158,6 +165,7 @@ class ARSessionManager: NSObject, ObservableObject {
     
     public func updateAnnotations() {
         for (id, anno) in annotations {
+            guard id == anno.anchorIdentifier else { return }
             // Gets the 2D screen point of the 3D world point.
             let translation = anno.transformMatrix(relativeTo: nil).translation
             guard let projectedPoint = self.arView.project(translation) else { return }
@@ -171,10 +179,6 @@ class ARSessionManager: NSObject, ObservableObject {
             // Updates the screen position of the note based on its visibility
             anno.projection = Projection(projectedPoint: projectedPoint, isVisible: isVisible)
             anno.updateScreenPosition()
-            
-//            if anno.anchorIdentifier != nil && anno.anchorIdentifier != id && !isVisible {
-//                anno.reanchor(.anchor(identifier: id))
-//            }
         }
     }
     

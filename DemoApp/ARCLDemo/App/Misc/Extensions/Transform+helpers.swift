@@ -28,21 +28,6 @@ extension Transform {
     }
 }
 
-extension SIMD4 where Scalar == Float {
-    init(_ xyz: SIMD3<Float>, w: Float) {
-        self.init(xyz.x, xyz.y, xyz.z, w)
-    }
-
-    var xyz: SIMD3<Float> {
-        get { return SIMD3<Float>(x: x, y: y, z: z) }
-        set {
-            x = newValue.x
-            y = newValue.y
-            z = newValue.z
-        }
-    }
-}
-
 extension float4x4 {
     
     public init(_ position: SIMD3<Float>, normal: SIMD3<Float>) {

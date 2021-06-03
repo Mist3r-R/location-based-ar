@@ -19,14 +19,20 @@ open class LBARView: ARView {
         }
     }
     
-    public var scalingScheme: ScalingScheme = .none
+    public var scalingScheme: ScalingScheme = .none {
+        didSet {
+            self.updateAnchors()
+        }
+    }
     
-    private var anchors: [LocationAnchorData] = []
-    private var pendingLocations: [Placemark] = []
+    internal var anchors: [LocationAnchorData] = []
+    public var anchorDistances: [String: Double] = [:]
+    internal var pendingLocations: [Placemark] = []
     
     // View Delegates
     public var delegate: LBARViewDelegate?
     public var sessionDelegate: LBARViewObserver?
+    public var locationProvider: LocationDataProvider?
     
     /// Maximum range of visible locations
     ///
@@ -34,10 +40,7 @@ open class LBARView: ARView {
     /// which may significantly decrease performance
     public var displayRangeFilter = 1000.0 {
         didSet {
-            if let location = lastSceneLocation,
-               let accuracy = lastSceneLocationAccuracy {
-                self.updateAnchors(at: location, with: accuracy)
-            }
+            self.updateAnchors()
         }
     }
     
@@ -46,10 +49,7 @@ open class LBARView: ARView {
     /// Values from `[30; 100]` are recommended
     public var maximumVisibleAnchorDistance = 50.0 {
         didSet {
-            if let location = lastSceneLocation,
-               let accuracy = lastSceneLocationAccuracy {
-                self.updateAnchors(at: location, with: accuracy)
-            }
+            self.updateAnchors()
         }
     }
     
@@ -61,13 +61,12 @@ open class LBARView: ARView {
     
     /// Current location of AR Scene
     internal var currentSceneLocation = SceneLocaiton() {
-        didSet(newValue) {
-            if let location = newValue.lastSceneLocation,
-               let accuracy = newValue.lastSceneLocationAccuracy {
-                self.updateAnchors(at: location, with: accuracy)
-            }
+        didSet {
+            self.updateAnchors()
         }
     }
+    
+    internal var locationUpdatesTimer = Timer()
     
     // convenience properties to access scene location data
     public var lastSceneLocation: CLLocation? { currentSceneLocation.lastSceneLocation }
@@ -150,6 +149,7 @@ open class LBARView: ARView {
         locationAnchor.anchor = anchor
 
         self.anchors.append(locationAnchor)
+        self.anchorDistances[locationAnchor.id] = location.haversineDistance(from: locationAnchor.location)
         self.processWaitingAnchors()
     }
     
@@ -171,8 +171,10 @@ open class LBARView: ARView {
                 let anchorData = LocationAnchorData(anchor)
                 anchorData.anchorEntity = entity
                 anchorData.status = .waitingForDisplay
-                print("\(#file) -- anchorData = \(anchorData.anchorId), \(anchorData.anchorEntity?.anchorIdentifier)")
                 self.anchors.append(anchorData)
+                if let location = lastSceneLocation {
+                    self.anchorDistances[anchorData.id] = location.haversineDistance(from: anchorData.location)
+                }
             } else {
                 // find location based on transform
                 guard let location = lastSceneLocation,
@@ -191,6 +193,7 @@ open class LBARView: ARView {
                 anchorData.anchorEntity = entity
                 anchorData.status = .waitingForDisplay
                 self.anchors.append(anchorData)
+                self.anchorDistances[anchorData.id] = location.haversineDistance(from: anchorData.location)
             }
         } else {
             if let placemark = placemark {
@@ -212,6 +215,9 @@ open class LBARView: ARView {
                         anchorData.anchorEntity = entity
                         anchorData.status = .waitingForDisplay
                         self.anchors.append(anchorData)
+                        if let location = self.lastSceneLocation {
+                            self.anchorDistances[anchorData.id] = location.haversineDistance(from: anchorData.location)
+                        }
                         self.scene.addAnchor(entity)
                     }
                 }
@@ -247,6 +253,7 @@ open class LBARView: ARView {
             if let anchor = self.anchors[index].anchor {
                 self.session.remove(anchor: anchor)
             }
+            self.anchorDistances.removeValue(forKey: self.anchors[index].id)
             self.anchors.remove(at: index)
         }
     }
@@ -260,6 +267,7 @@ open class LBARView: ARView {
             if let anchor = self.anchors[index].anchor {
                 self.session.remove(anchor: anchor)
             }
+            self.anchorDistances.removeValue(forKey: self.anchors[index].id)
             self.anchors.remove(at: index)
         }
     }
@@ -273,6 +281,7 @@ open class LBARView: ARView {
             if let anchor = self.anchors[index].anchor {
                 self.session.remove(anchor: anchor)
             }
+            self.anchorDistances.removeValue(forKey: self.anchors[index].id)
             self.anchors.remove(at: index)
         }
     }
@@ -287,6 +296,7 @@ open class LBARView: ARView {
                 self.scene.removeAnchor(entity)
             }
         })
+        self.anchorDistances.removeAll()
         self.anchors.removeAll()
     }
     
@@ -391,6 +401,7 @@ open class LBARView: ARView {
                         let anchorData = LocationAnchorData(coordinate: placemark.coordinate, accuracy: placemark.accuracy)
                         anchorData.status = .hidden
                         self.anchors.append(anchorData)
+                        self.anchorDistances[anchorData.id] = sceneLocation.haversineDistance(from: anchorData.location)
                     default: return
                     }
                 case .success(let transform):
@@ -404,6 +415,7 @@ open class LBARView: ARView {
                     anchorData.anchor = anchor
                     anchorData.status = .waitingForDisplay
                     self.anchors.append(anchorData)
+                    self.anchorDistances[anchorData.id] = sceneLocation.haversineDistance(from: anchorData.location)
                 }
             }
         })
@@ -412,7 +424,7 @@ open class LBARView: ARView {
     }
     
     // Helper method to process anchors that are in transition state (hidden -> displayed and vice versa)
-    private func processWaitingAnchors() {
+    internal func processWaitingAnchors() {
 
         let willBecomeVisible = self.anchors.filter({ $0.status == .waitingForDisplay && $0.anchor != nil })
         willBecomeVisible.forEach({

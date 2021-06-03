@@ -57,22 +57,26 @@ public class LocationManager: NSObject {
         self.delegate?.locationManagerDidStopServices()
     }
     
+    public func getCurrentLocation() -> CLLocation? {
+        return self.locationManager.location
+    }
+    
     func filterAndAddLocation(_ location: CLLocation) -> Bool {
         let age = -location.timestamp.timeIntervalSinceNow
         
         if age > 10 {
-            print("\(#file) -- filterAndAddLocation -- Cashed location")
+//            print("\(#file) -- filterAndAddLocation -- Cashed location")
             return false
         }
         
         if location.horizontalAccuracy < 0 {
-            print("\(#file) -- filterAndAddLocation -- Invalid accuracy")
+//            print("\(#file) -- filterAndAddLocation -- Invalid accuracy")
             return false
         }
         
         // TODO: Make a param?
         if location.horizontalAccuracy > 70 {
-            print("\(#file) -- filterAndAddLocation -- Too high accuracy")
+//            print("\(#file) -- filterAndAddLocation -- Too high accuracy")
             return false
         }
         
