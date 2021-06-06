@@ -25,7 +25,10 @@ public extension LBARView {
     // (6) Anchor's old distance <= tracking range &&   new distance > tracking range      --> move to tracking bound when possible
     // (7) Anchor's old distance <= tracking range &&   new distance <= tracking range     --> skip
     
-    func updateAnchors() {
+    func updateAnchors(newDisplayRangeFilter: Double? = nil, newMaximumVisibleAnchorDistance: Double? = nil) {
+        
+        let newDisplayRange: Double = newDisplayRangeFilter ?? self.displayRangeFilter
+        let newMaximumVisibleDistance: Double = newMaximumVisibleAnchorDistance ?? self.maximumVisibleAnchorDistance
         
         guard let currentLocation = lastSceneLocation,
               let currentAccuracy = lastSceneLocationAccuracy,
@@ -44,7 +47,7 @@ public extension LBARView {
         hiddenAnchors.forEach { anchorData in
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
             self.anchorDistances[anchorData.id] = newDistance
-            guard newDistance <= displayRangeFilter else { return } // case (2)
+            guard newDistance <= newDisplayRange else { return } // case (2)
             
             // case (1)
             self.locationToWorldTransform(anchorData.location, from: currentLocation, with: currentAccuracy) { result in
@@ -89,7 +92,7 @@ public extension LBARView {
         print("\(Date()) -- distant = \(distantAnchors.count)")
         distantAnchors.forEach { anchorData in
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
-            guard newDistance <= displayRangeFilter else {
+            guard newDistance <= newDisplayRange else {
                 // case (3)
                 self.anchorDistances[anchorData.id] = newDistance
                 anchorData.status = .waitingForHide
@@ -101,9 +104,9 @@ public extension LBARView {
             guard let oldTransform = anchorData.anchor?.transform else { return }
             let virtualDistance = self.cameraTransform.translation.distanceFrom(oldTransform.translation)
             
-            let realDistance = min(newDistance, maximumVisibleAnchorDistance)
+            let realDistance = min(newDistance, newMaximumVisibleDistance)
             
-            print("Checking: \(anchorData.id):\n\tvirtualDistance=\(virtualDistance)\n\tnewDistance=\(newDistance)\n\tmaximumVisibleAnchorDistance=\(maximumVisibleAnchorDistance)\n\tdiff=\(Double(virtualDistance) - realDistance)")
+            print("Checking: \(anchorData.id):\n\tvirtualDistance=\(virtualDistance)\n\tnewDistance=\(newDistance)\n\tmaximumVisibleAnchorDistance=\(newMaximumVisibleDistance)\n\tdiff=\(Double(virtualDistance) - realDistance)")
             
             // if difference between real and virtual distance is less than 1%, consider as ok
             guard abs(Double(virtualDistance) - realDistance) > realDistance * 0.01 else {
@@ -175,7 +178,7 @@ public extension LBARView {
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
             self.anchorDistances[anchorData.id] = newDistance
             // case (6)
-            if newDistance > maximumVisibleAnchorDistance {
+            if newDistance > newMaximumVisibleDistance {
                 self.locationToWorldTransform(anchorData.location, from: currentLocation, with: currentAccuracy) { result in
                     guard case .success(let newTransform) = result else { return }
                     
