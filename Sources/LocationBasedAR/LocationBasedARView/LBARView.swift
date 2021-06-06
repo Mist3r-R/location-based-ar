@@ -40,7 +40,7 @@ open class LBARView: ARView {
     /// which may significantly decrease performance
     public var displayRangeFilter = 1000.0 {
         willSet(newValue) {
-            self.updateAnchors()
+            self.updateAnchors(newDisplayRangeFilter: newValue)
         }
     }
     
@@ -49,7 +49,7 @@ open class LBARView: ARView {
     /// Values from `[30; 100]` are recommended
     public var maximumVisibleAnchorDistance = 50.0 {
         willSet(newValue) {
-            self.updateAnchors()
+            self.updateAnchors(newMaximumVisibleAnchorDistance: newValue)
         }
     }
     
@@ -449,104 +449,5 @@ open class LBARView: ARView {
         if !removedAnchors.isEmpty {
             self.delegate?.view(self, didRemove: removedAnchors)
         }
-    }
-    
-    // Helper method to update anchors positions in virtual (AR) coordinates based on current location
-    private func updateAnchors(at currentLocation: CLLocation, with accuracy: CLLocationAccuracy) {
-        
-        var updatedAnchors = [LocationAnchorData]()
-        
-        self.anchors.filter({ $0.status == .displayed && $0.anchor != nil }).forEach({ anchor in
-            if processAndUpdate(anchor, at: currentLocation, with: accuracy) {
-                updatedAnchors.append(anchor)
-            }
-        })
-        
-        self.anchors.filter({ $0.status == .hidden }).forEach({ anchor in
-            if processAndUpdate(anchor, at: currentLocation, with: accuracy) {
-                updatedAnchors.append(anchor)
-            }
-        })
-        
-        let anchors = updatedAnchors.compactMap({ $0.anchor })
-        if !anchors.isEmpty {
-            self.delegate?.view(self, didUpdate: anchors)
-        }
-        
-        self.processWaitingAnchors()
-    }
-    
-    // use with animation??
-    private func processAndUpdate(
-        _ anchorData: LocationAnchorData,
-        at currentLocation: CLLocation,
-        with accuracy: CLLocationAccuracy
-    ) -> Bool {
-        guard anchorData.status == .displayed || anchorData.status == .hidden else { return false }
-        
-        let distance = currentLocation.haversineDistance(from: anchorData.location)
-        let bearing = currentLocation.bearingBetween(anchorData.location)
-        
-        if anchorData.status == .hidden, distance <= displayRangeFilter {
-            
-            let distanceToAnchor = min(distance, maximumVisibleAnchorDistance)
-            let transform = MatrixHelper.transform(from: distanceToAnchor, with: Float(bearing))
-            
-            let anchor = LBAnchor(
-                name: anchorData.name ?? "LBAnchor",
-                transform: transform,
-                coordinate: anchorData.coordinate,
-                accuracy: anchorData.accuracy
-            )
-            anchorData.anchor = anchor
-            anchorData.status = .waitingForDisplay
-            return true
-        }
-        
-        if anchorData.status == .displayed, let oldAnchor = anchorData.anchor {
-            if distance > displayRangeFilter {
-                anchorData.status = .waitingForHide
-                return true
-            }
-            let distanceToAnchor = min(distance, maximumVisibleAnchorDistance)
-            let transform = MatrixHelper.transform(from: distanceToAnchor, with: Float(bearing))
-            
-            let oldDistance = oldAnchor.transform.translation.distanceFrom(lastCameraPosition ?? [0, 0, 0])
-            let newDistance = transform.translation.distanceFrom(lastCameraPosition ?? [0, 0, 0])
-            
-            if abs(Double(newDistance - oldDistance)) >= min(accuracy, distanceToAnchor / 100.0) {
-                print("\(#file) -- updating anchor=\(anchorData.id): old distance=\(oldDistance), new=\(newDistance)")
-                
-                if let oldAnchor = anchorData.anchor {
-                    
-                    let newAnchor = LBAnchor(from: oldAnchor, with: transform)
-                    self.session.add(anchor: newAnchor)
-                    anchorData.anchor = newAnchor
-                    
-                    if let anchorEntity = anchorData.anchorEntity {
-                        anchorEntity.reanchor(.anchor(identifier: newAnchor.identifier))
-                        anchorData.anchorEntity = anchorEntity
-                    }
-                    self.session.remove(anchor: oldAnchor)
-                    return true
-                } else {
-                    
-                    let newAnchor = LBAnchor(
-                        transform: transform, coordinate: anchorData.coordinate, accuracy: anchorData.accuracy
-                    )
-                    self.session.add(anchor: newAnchor)
-                    anchorData.anchor = newAnchor
-                    
-                    if let anchorEntity = anchorData.anchorEntity {
-                        anchorEntity.reanchor(.anchor(identifier: newAnchor.identifier))
-                        anchorData.anchorEntity = anchorEntity
-                    }
-                    return true
-                }
-            }
-            
-        }
-        
-        return false
     }
 }
