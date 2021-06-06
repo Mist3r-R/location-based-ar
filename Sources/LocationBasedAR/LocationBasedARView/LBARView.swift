@@ -39,8 +39,8 @@ open class LBARView: ARView {
     /// Too high values `(> 1000)` may result in too many anchors to be tracked
     /// which may significantly decrease performance
     public var displayRangeFilter = 1000.0 {
-        willSet(newValue) {
-            self.updateAnchors(newDisplayRangeFilter: newValue)
+        didSet(oldValue) {
+            self.updateAnchors(oldDisplayRangeFilter: oldValue)
         }
     }
     
@@ -48,8 +48,8 @@ open class LBARView: ARView {
     ///
     /// Values from `[30; 100]` are recommended
     public var maximumVisibleAnchorDistance = 50.0 {
-        willSet(newValue) {
-            self.updateAnchors(newMaximumVisibleAnchorDistance: newValue)
+        didSet(oldValue) {
+            self.updateAnchors(oldMaximumVisibleAnchorDistance: oldValue)
         }
     }
     

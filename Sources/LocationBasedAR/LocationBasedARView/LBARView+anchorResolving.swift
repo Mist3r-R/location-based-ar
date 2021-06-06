@@ -25,10 +25,10 @@ public extension LBARView {
     // (6) Anchor's old distance <= tracking range &&   new distance > tracking range      --> move to tracking bound when possible
     // (7) Anchor's old distance <= tracking range &&   new distance <= tracking range     --> skip
     
-    func updateAnchors(newDisplayRangeFilter: Double? = nil, newMaximumVisibleAnchorDistance: Double? = nil) {
+    func updateAnchors(oldDisplayRangeFilter: Double? = nil, oldMaximumVisibleAnchorDistance: Double? = nil) {
         
-        let newDisplayRange: Double = newDisplayRangeFilter ?? self.displayRangeFilter
-        let newMaximumVisibleDistance: Double = newMaximumVisibleAnchorDistance ?? self.maximumVisibleAnchorDistance
+        let oldDisplayRange: Double = oldDisplayRangeFilter ?? self.displayRangeFilter
+        let oldMaximumVisibleDistance: Double = oldMaximumVisibleAnchorDistance ?? self.maximumVisibleAnchorDistance
         
         guard let currentLocation = lastSceneLocation,
               let currentAccuracy = lastSceneLocationAccuracy,
@@ -38,7 +38,7 @@ public extension LBARView {
         
         // get hidden anchors based on old locations
         let hiddenAnchors = self.anchorDistances
-            .filter({ $0.value > self.displayRangeFilter })
+            .filter({ $0.value > oldDisplayRange })
             .compactMap({ $0.key })
             .compactMap({ id in self.anchors.first(where: {$0.id == id })})
         
@@ -47,7 +47,7 @@ public extension LBARView {
         hiddenAnchors.forEach { anchorData in
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
             self.anchorDistances[anchorData.id] = newDistance
-            guard newDistance <= newDisplayRange else { return } // case (2)
+            guard newDistance <= self.displayRangeFilter else { return } // case (2)
             
             // case (1)
             self.locationToWorldTransform(anchorData.location, from: currentLocation, with: currentAccuracy) { result in
@@ -85,14 +85,14 @@ public extension LBARView {
         
         // get anchors out of tracking range
         let distantAnchors = self.anchorDistances
-            .filter({ $0.value > self.maximumVisibleAnchorDistance && $0.value <= self.displayRangeFilter })
+            .filter({ $0.value > oldMaximumVisibleDistance && $0.value <= oldDisplayRange })
             .compactMap({ $0.key })
             .compactMap({ id in self.anchors.first(where: {$0.id == id })})
         
         print("\(Date()) -- distant = \(distantAnchors.count)")
         distantAnchors.forEach { anchorData in
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
-            guard newDistance <= newDisplayRange else {
+            guard newDistance <= self.displayRangeFilter else {
                 // case (3)
                 self.anchorDistances[anchorData.id] = newDistance
                 anchorData.status = .waitingForHide
@@ -104,9 +104,9 @@ public extension LBARView {
             guard let oldTransform = anchorData.anchor?.transform else { return }
             let virtualDistance = self.cameraTransform.translation.distanceFrom(oldTransform.translation)
             
-            let realDistance = min(newDistance, newMaximumVisibleDistance)
+            let realDistance = min(newDistance, self.maximumVisibleAnchorDistance)
             
-            print("Checking: \(anchorData.id):\n\tvirtualDistance=\(virtualDistance)\n\tnewDistance=\(newDistance)\n\tmaximumVisibleAnchorDistance=\(newMaximumVisibleDistance)\n\tdiff=\(Double(virtualDistance) - realDistance)")
+            print("Checking: \(anchorData.id):\n\tvirtualDistance=\(virtualDistance)\n\tnewDistance=\(newDistance)\n\tmaximumVisibleAnchorDistance=\(self.maximumVisibleAnchorDistance)\n\tdiff=\(Double(virtualDistance) - realDistance)")
             
             // if difference between real and virtual distance is less than 1%, consider as ok
             guard abs(Double(virtualDistance) - realDistance) > realDistance * 0.01 else {
@@ -169,7 +169,7 @@ public extension LBARView {
         
         // get anchors in tracking range
         let nearbyAnchors = self.anchorDistances
-            .filter({ $0.value <= self.maximumVisibleAnchorDistance })
+            .filter({ $0.value <= oldMaximumVisibleDistance })
             .compactMap({ $0.key })
             .compactMap({ id in self.anchors.first(where: {$0.id == id })})
         
@@ -178,7 +178,7 @@ public extension LBARView {
             let newDistance = currentLocation.haversineDistance(from: anchorData.location)
             self.anchorDistances[anchorData.id] = newDistance
             // case (6)
-            if newDistance > newMaximumVisibleDistance {
+            if newDistance > self.maximumVisibleAnchorDistance {
                 self.locationToWorldTransform(anchorData.location, from: currentLocation, with: currentAccuracy) { result in
                     guard case .success(let newTransform) = result else { return }
                     
