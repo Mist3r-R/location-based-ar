@@ -30,14 +30,14 @@ struct BrowseView: View {
 
 
 struct ModelByCategoryGrid: View {
-
+    
     @Binding var isShown: Bool
     let models = Models()
 
     var body: some View {
         ScrollView {
             VStack {
-                ForEach(ModelCategory.allCases, id: .self) { category in
+                ForEach(ModelCategory.allCases, id: \.self) { category in
                     let modelsByCategory = models.get(category: category)
                     if !modelsByCategory.isEmpty {
                         HorizontalGrid(title: category.label, items: modelsByCategory, isShown: $isShown)
@@ -47,3 +47,4 @@ struct ModelByCategoryGrid: View {
         }
     }
 }
+
